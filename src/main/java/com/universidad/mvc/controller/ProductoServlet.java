@@ -82,57 +82,59 @@ public class ProductoServlet extends HttpServlet {
 
     // ========================= GUARDAR (CON VALIDACIÓN) =========================
     private void guardar(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        req.setCharacterEncoding("UTF-8");
+    req.setCharacterEncoding("UTF-8");
 
-        String nombre = req.getParameter("nombre");
-        String categoria = req.getParameter("categoria");
-        String precioStr = req.getParameter("precio");
-        String stockStr = req.getParameter("stock");
+    String nombre = req.getParameter("nombre");
+    String categoria = req.getParameter("categoria");
+    String precioStr = req.getParameter("precio");
+    String stockStr = req.getParameter("stock");
 
-        Map<String, String> errores = new LinkedHashMap<>();
+    Map<String, String> errores = new LinkedHashMap<>();
 
-        // VALIDACIÓN NOMBRE
-        if (nombre == null || nombre.trim().isEmpty()) {
-            errores.put("nombre", "El nombre es obligatorio");
-        }
-
-        // VALIDACIÓN PRECIO
-        double precio = 0;
-        try {
-            precio = Double.parseDouble(precioStr);
-            if (precio < 0) errores.put("precio", "No puede ser negativo");
-        } catch (Exception e) {
-            errores.put("precio", "Debe ser número válido");
-        }
-
-        // VALIDACIÓN STOCK
-        int stock = 0;
-        try {
-            stock = Integer.parseInt(stockStr);
-            if (stock < 0) errores.put("stock", "No puede ser negativo");
-        } catch (Exception e) {
-            errores.put("stock", "Debe ser entero válido");
-        }
-
-        // SI HAY ERRORES → VOLVER FORMULARIO
-        if (!errores.isEmpty()) {
-            req.setAttribute("errores", errores);
-            req.setAttribute("nombre", nombre);
-            req.setAttribute("categoria", categoria);
-            req.setAttribute("precio", precioStr);
-            req.setAttribute("stock", stockStr);
-
-            forward(req, resp, "/WEB-INF/views/formulario.jsp");
-            return;
-        }
-
-        service.guardar(new Producto(0, nombre.trim(), categoria, precio, stock));
-
-        resp.sendRedirect(req.getContextPath()
-                + "/productos?mensaje=Producto+guardado");
+    // VALIDAR NOMBRE
+    if (nombre == null || nombre.trim().isEmpty()) {
+        errores.put("nombre", "El nombre es obligatorio");
     }
+
+    // VALIDAR PRECIO
+    double precio = 0;
+    try {
+        precio = Double.parseDouble(precioStr);
+        if (precio < 0) errores.put("precio", "No puede ser negativo");
+    } catch (Exception e) {
+        errores.put("precio", "Debe ser número válido");
+    }
+
+    // VALIDAR STOCK
+    int stock = 0;
+    try {
+        stock = Integer.parseInt(stockStr);
+        if (stock < 0) errores.put("stock", "No puede ser negativo");
+    } catch (Exception e) {
+        errores.put("stock", "Debe ser entero válido");
+    }
+
+    // SI HAY ERRORES → VOLVER AL FORMULARIO
+    if (!errores.isEmpty()) {
+        req.setAttribute("errores", errores);
+        req.setAttribute("nombre", nombre);
+        req.setAttribute("categoria", categoria);
+        req.setAttribute("precio", precioStr);
+        req.setAttribute("stock", stockStr);
+
+        req.getRequestDispatcher("/WEB-INF/views/formulario.jsp")
+                .forward(req, resp);
+        return;
+    }
+
+    // GUARDAR
+    service.guardar(new Producto(0, nombre.trim(), categoria, precio, stock));
+
+    resp.sendRedirect(req.getContextPath()
+            + "/productos?mensaje=Producto+guardado");
+}
 
     // ========================= ACTUALIZAR =========================
     private void actualizar(HttpServletRequest req, HttpServletResponse resp)
